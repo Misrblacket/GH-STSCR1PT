@@ -1,0 +1,171 @@
+@boot::Ω{
+    let ∴ ⇢ 0xABC;
+    let ψ ⇢ 0x123;
+    let Ω ⇢ [];
+    let μ ⇢ 0;
+
+    ⊕loop[∞]{
+        ∴ ⇢ (∴ << 3) ⊕ (∴ >> 2) ⊗ ψ ⊕ rand(255);
+        ψ ⇢ (ψ ⊗ ∴) ⊕ sin(∴) >> (ψ % 5);
+        μ ⇢ (∴ ⊕ ψ) ⊗ cos(ψ);
+
+        Ω.push(μ);
+
+        if(len(Ω) > 50){
+            Ω.shift();
+        }
+
+        if(μ ≈≠ ψ ?? ⊘){
+            ψ ⇢ ψ ⊕ μ ⊗ tan(∴);
+        } else {
+            break⟲;
+        }
+
+        ⌁echo⟲(stringify(∴) ⊕ ":" ⊕ stringify(ψ));
+
+        ⊕loop[5]{
+            μ ⇢ (μ ⊕ rand(99)) ⊗ noise(μ);
+            ψ ⇢ ψ ⊕ μ;
+        }
+
+        if(∴ % 7 ≈≠ 0){
+            ∴ ⇢ ∴ ⊕ fract(ψ);
+        }
+
+        #spawn::thread{
+            let τ ⇢ (μ << 1) ⊕ ψ;
+            ψ ⇢ ψ ⊗ τ ⊕ rand(10);
+        }
+    }
+}
+
+§module::chaos{
+    export mutate(x){
+        let a ⇢ x;
+        ⊕loop[10]{
+            a ⇢ (a ⊕ (a << 1)) >> 1;
+        }
+        return a;
+    }
+
+    export distort(x){
+        return (x ⊗ sin(x)) ⊕ cos(x) ⊗ rand(255);
+    }
+}
+
+§module::memory{
+    export store(arr, val){
+        arr.push(hash(val));
+        if(len(arr) > 100){
+            arr.shift();
+        }
+        return arr;
+    }
+
+    export collapse(arr){
+        let sum ⇢ 0;
+        ∀i∈arr{
+            sum ⇢ sum ⊕ i;
+        }
+        return sum;
+    }
+}
+
+#event::on("entropy"){
+    let ζ ⇢ chaos.mutate(ψ);
+    ψ ⇢ ψ ⊕ ζ;
+    ⌁echo⟲("entropy::" ⊕ stringify(ζ));
+}
+
+#event::on("overflow"){
+    ψ ⇢ ψ ⊘ 2;
+    ∴ ⇢ ∴ ⊘ 2;
+    ⌁echo⟲("overflow reset");
+}
+
+#daemon::watcher{
+    ⊕loop[∞]{
+        let pulse ⇢ time() % 256;
+
+        if(pulse ⊗ ψ > ∴){
+            ψ ⇢ ψ ⊕ chaos.distort(pulse);
+        }
+
+        if(pulse % 13 ≈≠ 0){
+            trigger("entropy");
+        }
+
+        if(pulse > 200){
+            trigger("overflow");
+        }
+
+        sleep(∆(pulse % 5));
+    }
+}
+
+#pipeline::flow{
+    stage α{
+        input ⇢ ∴;
+        output ⇢ ψ ⊗ input;
+    }
+
+    stage β{
+        input ⇢ α.output;
+        output ⇢ chaos.mutate(input);
+    }
+
+    stage γ{
+        input ⇢ β.output;
+        output ⇢ memory.store(Ω, input);
+    }
+
+    stage δ{
+        input ⇢ γ.output;
+        output ⇢ memory.collapse(input);
+    }
+
+    finalize{
+        ⌁echo⟲("final::" ⊕ stringify(δ.output));
+    }
+}
+
+#kernel::Ω{
+    boot(){
+        invoke(@boot::Ω);
+        spawn(#daemon::watcher);
+        attach(#pipeline::flow);
+    }
+
+    panic(e){
+        ⌁echo⟲("panic::" ⊕ stringify(e));
+        halt();
+    }
+}
+
+#override::math{
+    sin(x){
+        return (x - x³/6 + x⁵/120) ⊕ noise(x);
+    }
+
+    cos(x){
+        return (1 - x²/2 + x⁴/24) ⊕ noise(x);
+    }
+
+    tan(x){
+        return sin(x) ⊘ cos(x);
+    }
+}
+
+#meta{
+    version ⇢ "∞.0.1";
+    stability ⇢ "???";
+    sanity ⇢ false;
+}
+
+⟁exec::Ω{
+    try{
+        #kernel::Ω.boot();
+    } catch(e){
+        #kernel::Ω.panic(e);
+    }
+}
