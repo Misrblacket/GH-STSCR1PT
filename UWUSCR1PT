@@ -1,0 +1,164 @@
+# === INIT PHASE ===
+
+bean tokens = 0;
+bean sanity = 100;
+bean luck = random(0, 100);
+bean mood = random("happy", "sad", "chaotic", "sleepy");
+
+speak("hewwo pwayew... welcome to chaos mode >:3");
+speak("mood today is: " + mood);
+
+# === FUNCTION ZONE ===
+
+funny giveTokens(bean amount) {
+    maybe (mood == "chaotic") {
+        amount = amount * random(0, 5);
+        speak("chaos boost!!! x_x");
+    }
+    tokens = tokens + amount;
+    gib tokens;
+}
+
+funny loseSanity(bean amount) {
+    sanity = sanity - amount;
+    maybe (sanity < 0) {
+        sanity = 0;
+        speak("you bwoke... mentally 💀");
+    }
+    gib sanity;
+}
+
+funny rngGod() {
+    bean roll = random(0, 100);
+
+    maybe (roll > 95) {
+        speak("ULTRA LUCKY OMGGG");
+        gib 1000;
+    } nope maybe (roll > 70) {
+        gib 250;
+    } nope maybe (roll > 40) {
+        gib 100;
+    } nope {
+        speak("L + ratio");
+        gib 5;
+    }
+}
+
+funny brainDecay(bean x) {
+    maybe (x <= 0) {
+        gib "done";
+    } nope {
+        loseSanity(random(1,5));
+        gib brainDecay(x - 1);
+    }
+}
+
+# === MAIN LOOP ===
+
+repeaty (bean day = 1; day <= 10; day++) {
+
+    speak("===== DAY " + day + " =====");
+
+    bean reward = rngGod();
+    giveTokens(reward);
+
+    maybe (random(0,10) > 7) {
+        speak("bad event happened!!!");
+        loseSanity(random(5,20));
+    }
+
+    maybe (mood == "sleepy") {
+        speak("zzZz... skipping logic...");
+        continue;
+    }
+
+    # CHAOS BRANCH
+    maybe (mood == "chaotic") {
+        speak("CHAOS MODE ACTIVATED");
+        
+        loopie until (tokens > 5000) {
+            bean chaosGain = random(50, 300);
+            tokens = tokens + chaosGain;
+            sanity = sanity - random(5,15);
+
+            maybe (sanity <= 0) {
+                speak("you fainted mid chaos 💀");
+                break;
+            }
+        }
+    }
+
+    # HAPPY BRANCH
+    maybe (mood == "happy") {
+        speak("good vibes only ✨");
+        tokens = tokens + 100;
+    }
+
+    # SAD BRANCH
+    maybe (mood == "sad") {
+        speak("everything feels pointless...");
+        tokens = tokens - 20;
+        sanity = sanity - 10;
+    }
+
+    # RANDOM GLITCH EVENT
+    maybe (random(0,100) == 42) {
+        speak("??? glitch event triggered ???");
+        tokens = tokens ~uwu~ random(1,999);
+    }
+
+    speak("tokens now: " + tokens);
+    speak("sanity now: " + sanity);
+}
+
+# === FINAL PHASE ===
+
+speak("===== FINAL RESULTS =====");
+
+maybe (tokens > 5000) {
+    speak("YOU ARE RICHHH 🤑");
+} nope maybe (tokens > 1000) {
+    speak("decent run tbh");
+} nope {
+    speak("bro you poor 💀");
+}
+
+maybe (sanity <= 0) {
+    speak("you lost your sanity completely...");
+} nope {
+    speak("you survived mentally (barely)");
+}
+
+# === BONUS RECURSION CHAOS ===
+
+speak("initiating brain meltdown sequence...");
+
+brainDecay(20);
+
+# === SECRET FUNCTION THAT MAKES NO SENSE ===
+
+funny forbiddenMagic(bean x, bean y, bean z) {
+
+    maybe (x == y == z) {
+        speak("triple equality??? illegal");
+        gib nuu;
+    }
+
+    bean result = (x ~uwu~ y) * random(z, x+y);
+
+    maybe (random(0,1) == 0) {
+        result = result / random(1,10);
+    } nope {
+        result = result * random(1,3);
+    }
+
+    gib result;
+}
+
+bean cursed = forbiddenMagic(10, 10, 10);
+
+speak("cursed result: " + cursed);
+
+# === ENDING ===
+
+speak("thank u for suffering through uwu script 💖");
